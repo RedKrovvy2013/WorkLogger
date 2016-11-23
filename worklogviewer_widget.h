@@ -12,7 +12,7 @@
  */
 
 #include <QWidget>
-#include <QSqlRelationalTableModel>
+#include "tablemodel.h"
 #include <QTableView>
 #include <QGroupBox>
 #include <QLineEdit>
@@ -28,7 +28,7 @@ private:
 	QLineEdit *line_edit_range_start;
 	QLineEdit *line_edit_range_end;
 	QPushButton *btn_update_range;
-	QSqlRelationalTableModel *worklogmodel;
+	TableModel *worklogmodel;
 
 private slots:
 	void updateRangeHandler();

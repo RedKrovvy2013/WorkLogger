@@ -2,18 +2,17 @@
 #define WORKLOGMODEL_H
 
 #include <QObject>
-#include <QSqlRelationalTableModel>
+#include "tablemodel.h"
 
 class WorkLogModelContainer : public QObject
 {
     Q_OBJECT
 public:
     static WorkLogModelContainer * getSingleInstance();
-    QSqlRelationalTableModel * getModel();
-//    ~WorkLogModelContainer();
+    TableModel * getModel();
 private:
     explicit WorkLogModelContainer(QObject *parent = 0);
-    QSqlRelationalTableModel *model;
+    TableModel *model;
 };
 
 #endif // WORKLOGMODEL_H

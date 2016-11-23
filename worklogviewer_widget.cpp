@@ -20,8 +20,10 @@ WorkLogViewer_Widget::WorkLogViewer_Widget(QWidget *parent)
 //	Unlike the default delegate, QSqlRelationalDelegate provides a combobox for fields that are foreign
 //	keys into other tables. To use the class, simply call QAbstractItemView::setItemDelegate() on the view
 //	with an instance of QSqlRelationalDelegate
-	view->setItemDelegate(new QSqlRelationalDelegate(view));
-	view->hideColumn(0); // don't show the ID
+
+	//TODO: recover this fxality
+//	view->setItemDelegate(new QSqlRelationalDelegate(view));
+//	view->hideColumn(0); // don't show the ID
 	view->verticalHeader()->hide();
 	view->setAlternatingRowColors(true);
 	view->resizeColumnsToContents();
@@ -47,7 +49,7 @@ WorkLogViewer_Widget::WorkLogViewer_Widget(QWidget *parent)
 	
 
 	//------ column formatting...
-	view->setItemDelegateForColumn(3, new TimeFormatDelegate("hh:mm:ss"));
+//	view->setItemDelegateForColumn(3, new TimeFormatDelegate("hh:mm:ss"));
 
 
 	//------ setting up date range updater
@@ -56,14 +58,15 @@ WorkLogViewer_Widget::WorkLogViewer_Widget(QWidget *parent)
 }
 
 void WorkLogViewer_Widget::updateRangeHandler() {
-	QString sqlClause("start_time > '");
-	sqlClause.append(line_edit_range_start->text());
-	sqlClause.append(" 00:00:00");
-	sqlClause.append("' AND start_time < '");
-	sqlClause.append(line_edit_range_end->text());
-	sqlClause.append(" 00:00:00");
-	sqlClause.append("'");
-	worklogmodel->setFilter(sqlClause);
-	worklogmodel->select();
+//TODO: recover this fxality
+//	QString sqlClause("start_time > '");
+//	sqlClause.append(line_edit_range_start->text());
+//	sqlClause.append(" 00:00:00");
+//	sqlClause.append("' AND start_time < '");
+//	sqlClause.append(line_edit_range_end->text());
+//	sqlClause.append(" 00:00:00");
+//	sqlClause.append("'");
+//	worklogmodel->setFilter(sqlClause);
+//	worklogmodel->select();
 }
 //model->setFilter("start_time > '2016-02-01 00:00:00' AND start_time < '2016-04-01 00:00:00'");

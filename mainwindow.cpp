@@ -45,16 +45,17 @@ MainWindow::MainWindow()
     resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 }
 
+//TODO: recover these fxalities
 void MainWindow::open_workTypes() {
-	static ItemManagerDialog* d = new ItemManagerDialog("work_types");
-	d->exec();
-	emit managerDialogUpdated();
-	WorkLogModelContainer::getSingleInstance()->getModel()->relationModel(4)->select();
+//	static ItemManagerDialog* d = new ItemManagerDialog("work_types");
+//	d->exec();
+//	emit managerDialogUpdated();
+//	WorkLogModelContainer::getSingleInstance()->getModel()->relationModel(4)->select();
 }
-//TODO: maybe have open(QString tableName)...
+////TODO: maybe have open(QString tableName)...
 void MainWindow::open_projects() {
-	static ItemManagerDialog* d = new ItemManagerDialog("projects");
-	d->exec();
-	emit managerDialogUpdated();
-	WorkLogModelContainer::getSingleInstance()->getModel()->relationModel(5)->select();
+//	static ItemManagerDialog* d = new ItemManagerDialog("projects");
+//	d->exec();
+//	emit managerDialogUpdated();
+//	WorkLogModelContainer::getSingleInstance()->getModel()->relationModel(5)->select();
 }

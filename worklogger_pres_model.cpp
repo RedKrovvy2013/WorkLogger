@@ -1,6 +1,6 @@
 #include "worklogger_pres_model.h"
 #include "worklogmodel_container.h"
-#include <QSqlRelationalTableModel>
+#include "tablemodel.h"
 #include <QSortFilterProxyModel>
 #include <QRegExp>
 #include <QString>
@@ -29,18 +29,19 @@ WorkLogger_Pres_Model::WorkLogger_Pres_Model(  StopWatch_Pres_Model *stopwatch_p
 		mapper(0)
 {
 	WorkLogModelContainer *wcp = WorkLogModelContainer::getSingleInstance();
-	QSqlRelationalTableModel *worklogmodel = wcp->getModel();
+	TableModel *worklogmodel = wcp->getModel();
 
 	//hook up the UI elements as inputs to be inserted into Qt's hybrid business model/pres model;
 	//the pres model is doing one of its job requirements here,
 	//which is to connect UI interactions to the business model
-	mapper = new SqlDataWidget_EntryMapper(worklogmodel, this);
-	mapper->addMapping(dropdown_work_types, 4, "sqlIndex");
-	mapper->addMapping(dropdown_projects, 5, "sqlIndex");
-	mapper->addMapping(field_description, worklogmodel->fieldIndex("description"), "plainText");
-	mapper->addMapping(stopwatch_model, worklogmodel->fieldIndex("start_time"), "startTime");
-	mapper->addMapping(stopwatch_model, worklogmodel->fieldIndex("end_time"), "endTime");
-	mapper->addMapping(stopwatch_model, worklogmodel->fieldIndex("task_duration"), "accruedTime");
+	//TODO: recover this fxality
+//	mapper = new SqlDataWidget_EntryMapper(worklogmodel, this);
+//	mapper->addMapping(dropdown_work_types, 4, "sqlIndex");
+//	mapper->addMapping(dropdown_projects, 5, "sqlIndex");
+//	mapper->addMapping(field_description, worklogmodel->fieldIndex("description"), "plainText");
+//	mapper->addMapping(stopwatch_model, worklogmodel->fieldIndex("start_time"), "startTime");
+//	mapper->addMapping(stopwatch_model, worklogmodel->fieldIndex("end_time"), "endTime");
+//	mapper->addMapping(stopwatch_model, worklogmodel->fieldIndex("task_duration"), "accruedTime");
 
 
 	//TODO: have task btns' clicks trigger mapper.submit(),
@@ -85,24 +86,25 @@ WorkLogger_Pres_Model::WorkLogger_Pres_Model(  StopWatch_Pres_Model *stopwatch_p
 	addPropertyGoal("dataInserted", field_description, "plainText", QString());
 
 
-	//------hook up work type and project models into dropdown views
-	QSqlTableModel* model_projects = DragDropModel_Factory::load("projects", true /*filter out 'is_delete'*/);
-	QSqlTableModel* model_worktypes = DragDropModel_Factory::load("work_types", true);
-
-	QSortFilterProxyModel *proxyModel_worktypes = new QSortFilterProxyModel(this);
-    proxyModel_worktypes->setSourceModel(model_worktypes);
-	proxyModel_worktypes->setFilterRegExp(QRegExp("T", Qt::CaseInsensitive));
-	proxyModel_worktypes->setFilterKeyColumn(model_worktypes->fieldIndex("is_active"));
-	QSortFilterProxyModel *proxyModel_projects = new QSortFilterProxyModel(this);
-    proxyModel_projects->setSourceModel(model_projects);
-	proxyModel_projects->setFilterRegExp(QRegExp("T", Qt::CaseInsensitive));
-	proxyModel_projects->setFilterKeyColumn(model_projects->fieldIndex("is_active"));
-
-	dropdown_work_types->setModel(proxyModel_worktypes);
-	dropdown_work_types->setModelColumn(model_worktypes->fieldIndex("work_type_title"));
-
-	dropdown_projects->setModel(proxyModel_projects);
-	dropdown_projects->setModelColumn(model_projects->fieldIndex("project_title"));
+	//TODO: recover this fxality
+//	//------hook up work type and project models into dropdown views
+//	QSqlTableModel* model_projects = DragDropModel_Factory::load("projects", true /*filter out 'is_delete'*/);
+//	QSqlTableModel* model_worktypes = DragDropModel_Factory::load("work_types", true);
+//
+//	QSortFilterProxyModel *proxyModel_worktypes = new QSortFilterProxyModel(this);
+//    proxyModel_worktypes->setSourceModel(model_worktypes);
+//	proxyModel_worktypes->setFilterRegExp(QRegExp("T", Qt::CaseInsensitive));
+//	proxyModel_worktypes->setFilterKeyColumn(model_worktypes->fieldIndex("is_active"));
+//	QSortFilterProxyModel *proxyModel_projects = new QSortFilterProxyModel(this);
+//    proxyModel_projects->setSourceModel(model_projects);
+//	proxyModel_projects->setFilterRegExp(QRegExp("T", Qt::CaseInsensitive));
+//	proxyModel_projects->setFilterKeyColumn(model_projects->fieldIndex("is_active"));
+//
+//	dropdown_work_types->setModel(proxyModel_worktypes);
+//	dropdown_work_types->setModelColumn(model_worktypes->fieldIndex("work_type_title"));
+//
+//	dropdown_projects->setModel(proxyModel_projects);
+//	dropdown_projects->setModelColumn(model_projects->fieldIndex("project_title"));
 
 	//------END hook up work type and project models
 
