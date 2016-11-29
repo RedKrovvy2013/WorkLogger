@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     abstract_pres_model.cpp \
     worktypes_model_container.cpp \
     dragdropmodel_factory.cpp \
-    itemmanager_tableview.cpp
+    itemmanager_tableview.cpp \
+    descriptiondelegate.cpp
 
 HEADERS  += mainwindow.h \
     		db_container.h \
@@ -59,7 +60,8 @@ HEADERS  += mainwindow.h \
     abstract_pres_model.h \
     worktypes_model_container.h \
     dragdropmodel_factory.h \
-    itemmanager_tableview.h
+    itemmanager_tableview.h \
+    descriptiondelegate.h
 
 unix {
 	target.path = /usr/local/bin/

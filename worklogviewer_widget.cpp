@@ -6,6 +6,7 @@
 #include <QHeaderView>
 #include "worklogmodel_container.h"
 #include "timeformatdelegate.h"
+#include "descriptiondelegate.h"
 
 WorkLogViewer_Widget::WorkLogViewer_Widget(QWidget *parent)
 	: QWidget(parent),
@@ -24,8 +25,9 @@ WorkLogViewer_Widget::WorkLogViewer_Widget(QWidget *parent)
 	view->hideColumn(0); // don't show the ID
 	view->verticalHeader()->hide();
 	view->setAlternatingRowColors(true);
-	view->resizeColumnsToContents();
-	
+	view->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+	view->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+
 	QVBoxLayout *layout_1 = new QVBoxLayout();
 	box_worklogviewer = new QGroupBox(tr("Work Log Viewer"));
 	layout_1->addWidget(box_worklogviewer);
@@ -48,6 +50,11 @@ WorkLogViewer_Widget::WorkLogViewer_Widget(QWidget *parent)
 
 	//------ column formatting...
 	view->setItemDelegateForColumn(3, new TimeFormatDelegate("hh:mm:ss"));
+
+	view->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	view->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
+
+	view->setItemDelegateForColumn(6, new DescriptionDelegate(view, 6));
 
 
 	//------ setting up date range updater
