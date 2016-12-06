@@ -5,6 +5,10 @@
 #include <Qt>
 #include <QVector>
 #include <QString>
+#include "dbtalkerfriend.h"
+#include "dbtalker.h"
+#include <unordered_map>
+#include <QSqlQuery>
 
 class TableModel : public QAbstractTableModel
 {
@@ -22,12 +26,27 @@ public:
     bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) Q_DECL_OVERRIDE;
     bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) Q_DECL_OVERRIDE;
 
+    void setTable(QString);
+
 public slots:
 	void setDataFromSignal(QVector<QVector<QString>>);
+	
+private slots:
+	void processReply(int id, QSqlQuery results);
 
 private:
 	QVector<QVector<QString>> pData;
 	int width;
+	
+	DBTalkerFriend* dbtalkerfriend_;
+	
+	int generateId();
+	int idIndex;
+
+    typedef void (TableModel::*tablemodelfx)(QSqlQuery);
+    std::unordered_map<int, tablemodelfx> fxs;
+
+    void setTable_end(QSqlQuery);
 };
 
 #endif // TABLEMODEL_H

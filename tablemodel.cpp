@@ -2,16 +2,19 @@
 #include <QDebug>
 
 TableModel::TableModel(QObject *parent)
-    : QAbstractTableModel(parent), width(6)
+    : QAbstractTableModel(parent), width(6),
+	  dbtalkerfriend_(new DBTalkerFriend(this))
 {
+	connect(dbtalkerfriend_, &DBTalkerFriend::reply_recv,
+				this, &TableModel::processReply);
 }
 
 TableModel::TableModel(QVector<QVector<QString>> pData, QObject *parent)
     : QAbstractTableModel(parent),
 	  pData(pData),
-	  width(6)
-{
-}
+	  width(6),
+	  dbtalkerfriend_(new DBTalkerFriend(this))
+{ }
 
 int TableModel::rowCount(const QModelIndex &parent) const
 {
@@ -115,5 +118,32 @@ void TableModel::setDataFromSignal(QVector<QVector<QString>> data) {
 		    QModelIndex ix = index(0, j, QModelIndex());
 		    qDebug() << setData(ix, data[i][j]);
 		}
+	}
+}
+
+void TableModel::setTable(QString tablename) {
+	QString query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='test_logger' AND `TABLE_NAME`='tasks'");
+	int id = generateId();
+	fxs[id] = &TableModel::setTable_end;
+	dbtalkerfriend_->request(id, query);
+}
+
+void TableModel::setTable_end(QSqlQuery query) {
+	while(query.next()) {
+		qDebug() << query.value(0).toString();
+	}
+}
+
+int TableModel::generateId() {
+	return idIndex++;
+}
+
+void TableModel::processReply(int id, QSqlQuery results) {
+	auto it = fxs.find(id);
+	if(it != fxs.end()) {
+		(this->*it->second)(results);
+		fxs.erase(it);
+		//TODO: make a unit test verifying that |fxs|
+		//      no longer has id member
 	}
 }

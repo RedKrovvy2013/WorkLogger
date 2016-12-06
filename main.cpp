@@ -7,14 +7,29 @@
 #include "predestroy_guard.h"
 #include "predestroy_signaller.h"
 
+#include "dbtalkerfriend.h"
+
+#include <QSqlQuery>
+//TODO: find a better place for this
+Q_DECLARE_METATYPE(QSqlQuery);
+
 int main(int argc, char *argv[])
 {    
+
     QApplication a(argc, argv);
     MainWindow mw;
 
     WorkLogModelContainer *wcp = WorkLogModelContainer::getSingleInstance();
     TableModel *worklogmodel = wcp->getModel();
-    DBThreadManager* dbthread = new DBThreadManager(worklogmodel);
+
+
+	//TODO: find a better place for this
+    qRegisterMetaType<DBTalkerFriend*>();
+    qRegisterMetaType<QSqlQuery>();
+
+    DBTalkerFriend* dbtalkerfriend = new DBTalkerFriend();
+
+    DBThreadManager* dbthread = new DBThreadManager(worklogmodel, dbtalkerfriend);
     dbthread->start();
 
     mw.show();

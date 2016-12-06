@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     itemmanager_tableview.cpp \
     dbthreadmanager.cpp \
     tablemodel.cpp \
-    dbtalker.cpp
+    dbtalker.cpp \
+    dbtalkerfriend.cpp
 
 HEADERS  += mainwindow.h \
     		db_container.h \
@@ -65,7 +66,8 @@ HEADERS  += mainwindow.h \
     itemmanager_tableview.h \
     dbthreadmanager.h \
     tablemodel.h \
-    dbtalker.h
+    dbtalker.h \
+    dbtalkerfriend.h
 
 unix {
 	target.path = /usr/local/bin/

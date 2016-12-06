@@ -5,6 +5,8 @@
 #include <QSqlError>
 #include "pugixml.hpp"
 
+#include <Qt>
+
 DBTalker::DBTalker(QObject *parent) : QObject(parent)
 {
 	pugi::xml_document doc;
@@ -17,6 +19,10 @@ DBTalker::DBTalker(QObject *parent) : QObject(parent)
 	db.setDatabaseName(settings.attribute("dbname").value());
 	db.setUserName(settings.attribute("dbuser").value());
 	db.setPassword(settings.attribute("dbpwd").value());
+
+	if(!db.open()) {
+		qDebug() << db.lastError();
+	}
 }
 
 void DBTalker::talk() {
@@ -38,4 +44,21 @@ void DBTalker::talk() {
 	} else {
     	qDebug() << db.lastError();
 	}
+}
+
+void DBTalker::request_recv(DBTalkerFriend* obj, int id, QString queryStr, QString callback) {
+	QSqlQuery query(queryStr);
+	QMetaObject::invokeMethod(obj, callback.toLocal8Bit().constData(), Qt::QueuedConnection,
+							      Q_ARG(int, id), Q_ARG(QSqlQuery, query));
+}
+
+//static
+DBTalker* DBTalker::getSingleton() {
+	static DBTalker* dbtalker = new DBTalker;
+	//not! giving dbtalker a QObject parent as this would make dbtalker
+	//non-moveToThread-able and disallow intended moving of dbtalker
+	//to the db conn thread
+	return dbtalker;
+	//TODO: figure out what to do when aux thread deletes DBTalker
+	//      upon that thread finishing; this could happen in future apps
 }
