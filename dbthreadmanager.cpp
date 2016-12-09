@@ -3,11 +3,8 @@
 #include <QVector>
 #include <QString>
 
-DBThreadManager::DBThreadManager(TableModel* model, DBTalkerFriend* dbtalkerfriend, QObject *parent)
+DBThreadManager::DBThreadManager(QObject *parent)
             : QThread(parent),
-              m_abort(false),
-              model(model),
-			  dbtalkerfriend(dbtalkerfriend),
 			  dbtalker(DBTalker::getSingleton()) {
 	dbtalker->moveToThread(this);
     //guarantees that dbtalker has db conn thread affinity,
@@ -26,17 +23,5 @@ DBThreadManager::DBThreadManager(TableModel* model, DBTalkerFriend* dbtalkerfrie
 }
 
 void DBThreadManager::run() {
-
-//    DBTalker* dbtalker = new DBTalker;
-
-//    dbtalkerfriend->setTalker(dbtalker);
-    model->setTable("bar");
-
-    qRegisterMetaType<QVector<QVector<QString>>>();
-    connect(dbtalker, SIGNAL(fireTableData(QVector<QVector<QString>>)),
-            model, SLOT(setDataFromSignal(QVector<QVector<QString>>)));
-
-    dbtalker->talk();
-
     exec();
 }

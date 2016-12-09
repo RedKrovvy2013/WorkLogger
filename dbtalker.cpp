@@ -25,35 +25,31 @@ DBTalker::DBTalker(QObject *parent) : QObject(parent)
 	}
 }
 
-void DBTalker::talk() {
-
-	if(db.open()) {
-		QSqlQuery query("SELECT start_time, end_time, task_duration, work_type_id, project_id, description FROM tasks");
-		//2nd parameter default is QSqlDatabase, which defaults to db default...
-
-		QVector<QVector<QString>> records;
-		while(query.next()) {
-			QVector<QString> record;
-			for(int i=0; i != 6; ++i) {
-				record.push_back(query.value(i).toString());
-			}
-			records.push_back(record);
-		}
-
-		emit(fireTableData(records));
-	} else {
-    	qDebug() << db.lastError();
-	}
-}
-
+//#include <functional>
+//#include <QTimer>
 void DBTalker::request_recv(DBTalkerFriend* obj, int id, QString queryStr, QString callback) {
+
+// USE! the commented code to test that ConcurrentSqlTableModel::select() and select_again()
+//      properly cycle in holding pattern until ConcurrentSqlTableModel's setTable operation
+//      series completes.
+
+//	static int count = 0;
+//	if(count != 2) {
+//	    ++count;
+//	    QTimer::singleShot(1000, std::bind(&DBTalker::request_recv, this, obj, id, queryStr, callback));
+//		return;
+//	} else {
+//		count = 0;
+//	}
 	QSqlQuery query(queryStr);
 	QMetaObject::invokeMethod(obj, callback.toLocal8Bit().constData(), Qt::QueuedConnection,
-							      Q_ARG(int, id), Q_ARG(QSqlQuery, query));
+								  Q_ARG(int, id), Q_ARG(QSqlQuery, query));
 }
 
 //static
 DBTalker* DBTalker::getSingleton() {
+	//TODO: make this and all singletons have better singleton security/enforcement;
+	//      maybe have ctor be private so it can only be called from here
 	static DBTalker* dbtalker = new DBTalker;
 	//not! giving dbtalker a QObject parent as this would make dbtalker
 	//non-moveToThread-able and disallow intended moving of dbtalker

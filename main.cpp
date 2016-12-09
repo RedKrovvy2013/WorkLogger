@@ -7,7 +7,8 @@
 #include "predestroy_guard.h"
 #include "predestroy_signaller.h"
 
-#include "dbtalkerfriend.h"
+#include <functional>
+#include <QTimer>
 
 #include <QSqlQuery>
 //TODO: find a better place for this
@@ -15,7 +16,6 @@ Q_DECLARE_METATYPE(QSqlQuery);
 
 int main(int argc, char *argv[])
 {    
-
     QApplication a(argc, argv);
     MainWindow mw;
 
@@ -27,10 +27,25 @@ int main(int argc, char *argv[])
     qRegisterMetaType<DBTalkerFriend*>();
     qRegisterMetaType<QSqlQuery>();
 
-    DBTalkerFriend* dbtalkerfriend = new DBTalkerFriend();
-
-    DBThreadManager* dbthread = new DBThreadManager(worklogmodel, dbtalkerfriend);
+    //TODO: figure out what to do when setTable()/select() are errantly called before
+    //      db thread is set up...
+    DBThreadManager* dbthread = new DBThreadManager;
     dbthread->start();
+
+    worklogmodel->setTable("tasks");
+    worklogmodel->select();
+
+//    QTimer::singleShot(5000, std::bind(&TableModel::setTable, worklogmodel, "tasks"));
+//    QTimer::singleShot(6000, std::bind(&TableModel::select, worklogmodel));
+
+////  could have multiple setTable()s before doing a select(),
+////  where the select() actually will make width/column size of table model data change
+////    worklogmodel->setTable("foo");
+////    worklogmodel->setTable("bar");
+//    //TODO: make unit test that verifies that "bar" table is select()'d upon;
+//    //      naive impl of just using an isSettingTable bool would lead to
+//    //      subsequent select() potentially select'ing upon "foo" table
+//    //      which is not expected by client coder since setTable("foo") call occurred first
 
     mw.show();
 

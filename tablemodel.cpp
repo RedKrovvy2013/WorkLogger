@@ -1,31 +1,27 @@
 #include "tablemodel.h"
+#include <QTimer>
 #include <QDebug>
 
 TableModel::TableModel(QObject *parent)
-    : QAbstractTableModel(parent), width(6),
+    : QAbstractTableModel(parent),
+	  setTable_opSeries_count_(0),
+	  width_(0),
 	  dbtalkerfriend_(new DBTalkerFriend(this))
 {
 	connect(dbtalkerfriend_, &DBTalkerFriend::reply_recv,
 				this, &TableModel::processReply);
 }
 
-TableModel::TableModel(QVector<QVector<QString>> pData, QObject *parent)
-    : QAbstractTableModel(parent),
-	  pData(pData),
-	  width(6),
-	  dbtalkerfriend_(new DBTalkerFriend(this))
-{ }
-
 int TableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return pData.size();
+    return pData_.size();
 }
 
 int TableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return width;
+    return width_;
 }
 
 QVariant TableModel::data(const QModelIndex &index, int role) const
@@ -33,11 +29,11 @@ QVariant TableModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= pData.size() || index.row() < 0)
+    if (index.row() >= pData_.size() || index.row() < 0)
         return QVariant();
 
     if (role == Qt::DisplayRole) {
-    	return pData[index.row()][index.column()];
+    	return pData_[index.row()][index.column()];
     }
     return QVariant();
 }
@@ -61,8 +57,8 @@ bool TableModel::insertRows(int position, int rows, const QModelIndex &index)
     beginInsertRows(QModelIndex(), position, position + rows - 1);
 
     for (int row = 0; row < rows; ++row) {
-        QVector<QString> record(width, QString());
-        pData.insert(position, record);
+        QVector<QString> record(columnCount(QModelIndex()), QString());
+        pData_.insert(position, record);
     }
 
     endInsertRows();
@@ -75,7 +71,7 @@ bool TableModel::removeRows(int position, int rows, const QModelIndex &index)
     beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
     for (int row = 0; row < rows; ++row) {
-        pData.removeAt(position);
+        pData_.removeAt(position);
     }
 
     endRemoveRows();
@@ -88,7 +84,7 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
     if (index.isValid()) {
         int row = index.row();
 
-        QVector<QString> record = pData.value(row);
+        QVector<QString> record = pData_.value(row);
 
         if(index.column() > record.size()-1)
         	return false;
@@ -97,7 +93,7 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
         	qDebug() << index.column() << ": " << value.toString();
         }
 
-        pData.replace(row, record);
+        pData_.replace(row, record);
         emit(dataChanged(index, index));
 
         return true;
@@ -106,44 +102,118 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
     return false;
 }
 
-void TableModel::setDataFromSignal(QVector<QVector<QString>> data) {
-
-	int recordSize = data[0].size();
-	for(int i=0; i < data.size(); ++i) {
-
-		insertRows(0, 1, QModelIndex());
-
-		for(int j=0; j < recordSize; ++j) {
-
-		    QModelIndex ix = index(0, j, QModelIndex());
-		    qDebug() << setData(ix, data[i][j]);
-		}
-	}
-}
-
-void TableModel::setTable(QString tablename) {
-	QString query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='test_logger' AND `TABLE_NAME`='tasks'");
+void TableModel::setTable(QString futureTablename) {
+	QString query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` "
+			      "WHERE `TABLE_SCHEMA`='test_logger' AND `TABLE_NAME`='" + futureTablename + "'");
 	int id = generateId();
 	fxs[id] = &TableModel::setTable_end;
+	QVector<QPair<QString, QString>> props;
+	props.push_back(QPair<QString, QString>("futureTablename", futureTablename));
+	waiting_props[id] = props;
+
+	++setTable_opSeries_count_;
 	dbtalkerfriend_->request(id, query);
 }
 
 void TableModel::setTable_end(QSqlQuery query) {
+	QVector<QString> tempFieldnames;
 	while(query.next()) {
-		qDebug() << query.value(0).toString();
+		tempFieldnames.push_back(query.value(0).toString());
 	}
+	futureFieldnames_ = tempFieldnames;
+	--setTable_opSeries_count_;
 }
 
 int TableModel::generateId() {
-	return idIndex++;
+	return idIndex_++;
 }
 
 void TableModel::processReply(int id, QSqlQuery results) {
-	auto it = fxs.find(id);
-	if(it != fxs.end()) {
-		(this->*it->second)(results);
-		fxs.erase(it);
+	auto propsMapIt = waiting_props.find(id);
+	if(propsMapIt != waiting_props.end()) {
+		auto props = propsMapIt->second; //current impl has props as QVector<QPair<QString, QString>>
+		for(auto propsIt = props.begin(); propsIt != props.end(); ++propsIt) {
+			setProperty(propsIt->first.toLocal8Bit().constData(), propsIt->second);
+			//                  property                               value
+			//TODO: make unit test verifying that multiple properties can be successfully set!
+		}
+		waiting_props.erase(propsMapIt);
+	};
+	auto fxIt = fxs.find(id);
+	if(fxIt != fxs.end()) {
+		(this->*fxIt->second)(results);
+		fxs.erase(fxIt);
 		//TODO: make a unit test verifying that |fxs|
 		//      no longer has id member
 	}
+}
+
+QString TableModel::getFutureTablename() {
+	return futureTablename_;
+}
+
+void TableModel::setFutureTablename(QString futureTablename) {
+	futureTablename_ = futureTablename;
+}
+
+void TableModel::select() {
+	if(setTable_opSeries_count_) {
+		QTimer::singleShot(200, this, &TableModel::select_again);
+	} else {
+		qDebug() << futureTablename_;
+		QString query("SELECT ");
+		for(auto fieldsIt = futureFieldnames_.begin(); fieldsIt != futureFieldnames_.end(); ++fieldsIt) {
+			query += *fieldsIt;
+			if( fieldsIt + 1 != futureFieldnames_.end() )
+				query += ", ";
+		}
+		query += " FROM ";
+		query += futureTablename_;
+
+		int id = generateId();
+		fxs[id] = &TableModel::select_end;
+
+		dbtalkerfriend_->request(id, query);
+	}
+}
+
+void TableModel::select_again() {
+	if(setTable_opSeries_count_) {
+		//TODO: optimize the timeout duration
+		QTimer::singleShot(200, this, &TableModel::select_again);
+	} else {
+		select();
+	}
+}
+
+void TableModel::select_end(QSqlQuery query) {
+
+	if(futureFieldnames_.size() > fieldnames_.size()) {
+		beginInsertColumns(QModelIndex(), fieldnames_.size() /*first*/, futureFieldnames_.size()-1 /*last*/);
+		width_ = futureFieldnames_.size();
+		endInsertColumns();
+	} else if(futureFieldnames_.size() < fieldnames_.size()) {
+		beginRemoveColumns(QModelIndex(), futureFieldnames_.size() /*first*/, fieldnames_.size()-1 /*last*/);
+		width_ = futureFieldnames_.size();
+		endRemoveColumns();
+	}
+	//The above is needed for attached views to actually show new data
+	//Note: |width_| must be used for (begin|end)(Remove|Insert)Columns() fxs to work as expected
+
+	if(rowCount(QModelIndex()) > 0)
+		removeRows(0, rowCount(QModelIndex()), QModelIndex());
+		//will still be old data's rowCount()
+
+	while(query.next()) {
+		//TODO: fix so that last row is on bottom, first row on top
+		insertRows(0, 1, QModelIndex());
+		for(int i=0; i != futureFieldnames_.size(); ++i) {
+			 QModelIndex ix = index(0, i, QModelIndex());
+			 setData(ix, query.value(i).toString());
+			 qDebug() << query.value(i).toString();
+		}
+	}
+
+	fieldnames_ = futureFieldnames_;
+	tablename_ = futureTablename_;
 }
