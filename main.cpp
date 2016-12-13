@@ -2,7 +2,7 @@
 #include <QApplication>
 #include "worklogmodel_container.h"
 #include "dbthreadmanager.h"
-#include "tablemodel.h"
+#include "concurrentdbtablemodel.h"
 
 #include "predestroy_guard.h"
 #include "predestroy_signaller.h"
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     MainWindow mw;
 
     WorkLogModelContainer *wcp = WorkLogModelContainer::getSingleInstance();
-    TableModel *worklogmodel = wcp->getModel();
+    ConcurrentDBTableModel *worklogmodel = wcp->getModel();
 
 
 	//TODO: find a better place for this
@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
     worklogmodel->setTable("tasks");
     worklogmodel->select();
 
-//    QTimer::singleShot(5000, std::bind(&TableModel::setTable, worklogmodel, "tasks"));
-//    QTimer::singleShot(6000, std::bind(&TableModel::select, worklogmodel));
+//    QTimer::singleShot(5000, std::bind(&ConcurrentDBTableModel::setTable, worklogmodel, "tasks"));
+//    QTimer::singleShot(6000, std::bind(&ConcurrentDBTableModel::select, worklogmodel));
 
 ////  could have multiple setTable()s before doing a select(),
 ////  where the select() actually will make width/column size of table model data change

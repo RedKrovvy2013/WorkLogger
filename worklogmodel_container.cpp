@@ -5,7 +5,7 @@
 
 WorkLogModelContainer::WorkLogModelContainer(QObject *parent) : QObject(parent)
 {
-	model = new TableModel(this);
+	model = new ConcurrentDBTableModel(this);
 
 //	DbContainer *dbContainer = DbContainer::getSingleInstance();
 //	model = new QSqlRelationalTableModel(this, dbContainer->getDb());
@@ -36,6 +36,6 @@ WorkLogModelContainer * WorkLogModelContainer::getSingleInstance() {
 	return wcp;
 }
 
-TableModel * WorkLogModelContainer::getModel() {
+ConcurrentDBTableModel * WorkLogModelContainer::getModel() {
 	return model;
 }

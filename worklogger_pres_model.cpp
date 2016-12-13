@@ -1,6 +1,6 @@
 #include "worklogger_pres_model.h"
 #include "worklogmodel_container.h"
-#include "tablemodel.h"
+#include "concurrentdbtablemodel.h"
 #include <QSortFilterProxyModel>
 #include <QRegExp>
 #include <QString>
@@ -29,7 +29,7 @@ WorkLogger_Pres_Model::WorkLogger_Pres_Model(  StopWatch_Pres_Model *stopwatch_p
 		mapper(0)
 {
 	WorkLogModelContainer *wcp = WorkLogModelContainer::getSingleInstance();
-	TableModel *worklogmodel = wcp->getModel();
+	ConcurrentDBTableModel *worklogmodel = wcp->getModel();
 
 	//hook up the UI elements as inputs to be inserted into Qt's hybrid business model/pres model;
 	//the pres model is doing one of its job requirements here,

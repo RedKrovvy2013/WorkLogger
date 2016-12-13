@@ -1,5 +1,5 @@
-#ifndef TABLEMODEL_H
-#define TABLEMODEL_H
+#ifndef CONCURRENTDBTABLEMODEL_H
+#define CONCURRENTDBTABLEMODEL_H
 
 #include <QAbstractTableModel>
 #include <Qt>
@@ -30,13 +30,13 @@
  * 	     		 (think First In, Random Out...)
  */
 
-class TableModel : public QAbstractTableModel
+class ConcurrentDBTableModel : public QAbstractTableModel
 {
     Q_OBJECT
     Q_PROPERTY(QString futureTablename READ getFutureTablename WRITE setFutureTablename)
 
 public:
-    TableModel(QObject *parent = 0);
+    ConcurrentDBTableModel(QObject *parent = 0);
 
     int rowCount(const QModelIndex &parent) const Q_DECL_OVERRIDE;
     int columnCount(const QModelIndex &parent) const Q_DECL_OVERRIDE;
@@ -67,7 +67,7 @@ private:
 	int generateId();
 	int idIndex_;
 
-    typedef void (TableModel::*tablemodelfx)(QSqlQuery);
+    typedef void (ConcurrentDBTableModel::*tablemodelfx)(QSqlQuery);
     std::unordered_map<int, tablemodelfx> fxs;
     std::unordered_map< int, QVector<QPair<QString, QString>> > waiting_props;
 
@@ -87,4 +87,4 @@ private:
     void select_end(QSqlQuery);
 };
 
-#endif // TABLEMODEL_H
+#endif // CONCURRENTDBTABLEMODEL_H

@@ -38,7 +38,7 @@ SOURCES += main.cpp\
     dragdropmodel_factory.cpp \
     itemmanager_tableview.cpp \
     dbthreadmanager.cpp \
-    tablemodel.cpp \
+    concurrentdbtablemodel.cpp \
     dbtalker.cpp \
     dbtalkerfriend.cpp
 
@@ -65,7 +65,7 @@ HEADERS  += mainwindow.h \
     dragdropmodel_factory.h \
     itemmanager_tableview.h \
     dbthreadmanager.h \
-    tablemodel.h \
+    concurrentdbtablemodel.h \
     dbtalker.h \
     dbtalkerfriend.h
 

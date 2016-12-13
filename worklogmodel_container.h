@@ -2,17 +2,17 @@
 #define WORKLOGMODEL_H
 
 #include <QObject>
-#include "tablemodel.h"
+#include "concurrentdbtablemodel.h"
 
 class WorkLogModelContainer : public QObject
 {
     Q_OBJECT
 public:
     static WorkLogModelContainer * getSingleInstance();
-    TableModel * getModel();
+    ConcurrentDBTableModel * getModel();
 private:
     explicit WorkLogModelContainer(QObject *parent = 0);
-    TableModel *model;
+    ConcurrentDBTableModel *model;
 };
 
 #endif // WORKLOGMODEL_H

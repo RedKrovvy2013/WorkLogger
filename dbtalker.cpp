@@ -29,8 +29,8 @@ DBTalker::DBTalker(QObject *parent) : QObject(parent)
 //#include <QTimer>
 void DBTalker::request_recv(DBTalkerFriend* obj, int id, QString queryStr, QString callback) {
 
-// USE! the commented code to test that ConcurrentSqlTableModel::select() and select_again()
-//      properly cycle in holding pattern until ConcurrentSqlTableModel's setTable operation
+// USE! the commented code to test that ConcurrentDBTableModel::select() and select_again()
+//      properly cycle in holding pattern until ConcurrentDBTableModel's setTable operation
 //      series completes.
 
 //	static int count = 0;

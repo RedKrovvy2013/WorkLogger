@@ -1,30 +1,30 @@
-#include "tablemodel.h"
+#include "concurrentdbtablemodel.h"
 #include <QTimer>
 #include <QDebug>
 
-TableModel::TableModel(QObject *parent)
+ConcurrentDBTableModel::ConcurrentDBTableModel(QObject *parent)
     : QAbstractTableModel(parent),
 	  setTable_opSeries_count_(0),
 	  width_(0),
 	  dbtalkerfriend_(new DBTalkerFriend(this))
 {
 	connect(dbtalkerfriend_, &DBTalkerFriend::reply_recv,
-				this, &TableModel::processReply);
+				this, &ConcurrentDBTableModel::processReply);
 }
 
-int TableModel::rowCount(const QModelIndex &parent) const
+int ConcurrentDBTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return pData_.size();
 }
 
-int TableModel::columnCount(const QModelIndex &parent) const
+int ConcurrentDBTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return width_;
 }
 
-QVariant TableModel::data(const QModelIndex &index, int role) const
+QVariant ConcurrentDBTableModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -38,7 +38,7 @@ QVariant TableModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-QVariant TableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ConcurrentDBTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	Q_UNUSED(orientation);
 	Q_UNUSED(section);
@@ -51,7 +51,7 @@ QVariant TableModel::headerData(int section, Qt::Orientation orientation, int ro
     return QVariant();
 }
 
-bool TableModel::insertRows(int position, int rows, const QModelIndex &index)
+bool ConcurrentDBTableModel::insertRows(int position, int rows, const QModelIndex &index)
 {
     Q_UNUSED(index);
     beginInsertRows(QModelIndex(), position, position + rows - 1);
@@ -65,7 +65,7 @@ bool TableModel::insertRows(int position, int rows, const QModelIndex &index)
     return true;
 }
 
-bool TableModel::removeRows(int position, int rows, const QModelIndex &index)
+bool ConcurrentDBTableModel::removeRows(int position, int rows, const QModelIndex &index)
 {
     Q_UNUSED(index);
     beginRemoveRows(QModelIndex(), position, position + rows - 1);
@@ -78,7 +78,7 @@ bool TableModel::removeRows(int position, int rows, const QModelIndex &index)
     return true;
 }
 
-bool TableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ConcurrentDBTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
 
     if (index.isValid()) {
@@ -102,11 +102,11 @@ bool TableModel::setData(const QModelIndex &index, const QVariant &value, int ro
     return false;
 }
 
-void TableModel::setTable(QString futureTablename) {
+void ConcurrentDBTableModel::setTable(QString futureTablename) {
 	QString query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` "
 			      "WHERE `TABLE_SCHEMA`='test_logger' AND `TABLE_NAME`='" + futureTablename + "'");
 	int id = generateId();
-	fxs[id] = &TableModel::setTable_end;
+	fxs[id] = &ConcurrentDBTableModel::setTable_end;
 	QVector<QPair<QString, QString>> props;
 	props.push_back(QPair<QString, QString>("futureTablename", futureTablename));
 	waiting_props[id] = props;
@@ -115,7 +115,7 @@ void TableModel::setTable(QString futureTablename) {
 	dbtalkerfriend_->request(id, query);
 }
 
-void TableModel::setTable_end(QSqlQuery query) {
+void ConcurrentDBTableModel::setTable_end(QSqlQuery query) {
 	QVector<QString> tempFieldnames;
 	while(query.next()) {
 		tempFieldnames.push_back(query.value(0).toString());
@@ -124,11 +124,11 @@ void TableModel::setTable_end(QSqlQuery query) {
 	--setTable_opSeries_count_;
 }
 
-int TableModel::generateId() {
+int ConcurrentDBTableModel::generateId() {
 	return idIndex_++;
 }
 
-void TableModel::processReply(int id, QSqlQuery results) {
+void ConcurrentDBTableModel::processReply(int id, QSqlQuery results) {
 	auto propsMapIt = waiting_props.find(id);
 	if(propsMapIt != waiting_props.end()) {
 		auto props = propsMapIt->second; //current impl has props as QVector<QPair<QString, QString>>
@@ -148,17 +148,17 @@ void TableModel::processReply(int id, QSqlQuery results) {
 	}
 }
 
-QString TableModel::getFutureTablename() {
+QString ConcurrentDBTableModel::getFutureTablename() {
 	return futureTablename_;
 }
 
-void TableModel::setFutureTablename(QString futureTablename) {
+void ConcurrentDBTableModel::setFutureTablename(QString futureTablename) {
 	futureTablename_ = futureTablename;
 }
 
-void TableModel::select() {
+void ConcurrentDBTableModel::select() {
 	if(setTable_opSeries_count_) {
-		QTimer::singleShot(200, this, &TableModel::select_again);
+		QTimer::singleShot(200, this, &ConcurrentDBTableModel::select_again);
 	} else {
 		qDebug() << futureTablename_;
 		QString query("SELECT ");
@@ -171,22 +171,22 @@ void TableModel::select() {
 		query += futureTablename_;
 
 		int id = generateId();
-		fxs[id] = &TableModel::select_end;
+		fxs[id] = &ConcurrentDBTableModel::select_end;
 
 		dbtalkerfriend_->request(id, query);
 	}
 }
 
-void TableModel::select_again() {
+void ConcurrentDBTableModel::select_again() {
 	if(setTable_opSeries_count_) {
 		//TODO: optimize the timeout duration
-		QTimer::singleShot(200, this, &TableModel::select_again);
+		QTimer::singleShot(200, this, &ConcurrentDBTableModel::select_again);
 	} else {
 		select();
 	}
 }
 
-void TableModel::select_end(QSqlQuery query) {
+void ConcurrentDBTableModel::select_end(QSqlQuery query) {
 
 	if(futureFieldnames_.size() > fieldnames_.size()) {
 		beginInsertColumns(QModelIndex(), fieldnames_.size() /*first*/, futureFieldnames_.size()-1 /*last*/);
