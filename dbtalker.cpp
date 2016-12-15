@@ -41,6 +41,7 @@ void DBTalker::request_recv(DBTalkerFriend* obj, int id, QString queryStr, QStri
 //	} else {
 //		count = 0;
 //	}
+
 	QSqlQuery query(queryStr);
 	QMetaObject::invokeMethod(obj, callback.toLocal8Bit().constData(), Qt::QueuedConnection,
 								  Q_ARG(int, id), Q_ARG(QSqlQuery, query));

@@ -13,9 +13,10 @@ TEMPLATE = app
 
 QTPLUGIN += QSQLMYSQL
 
-INCLUDEPATH += "C:\Users\RedKrovvy\code\C++\Qt\include" "C:\Users\RedKrovvy\code\C++\include"
+INCLUDEPATH += "C:\Users\RedKrovvy\code\C++\Qt\include" "C:\Users\RedKrovvy\code\C++\include" "C:\programs\source\googletest\googletest\include"
 
-SOURCES += main.cpp\
+#SOURCES += main.cpp \
+SOURCES += concurrentdbtablemodel_unittest.cpp \
            mainwindow.cpp \
     	   db_container.cpp \
     	   dropdown_widget.cpp \
@@ -40,7 +41,8 @@ SOURCES += main.cpp\
     dbthreadmanager.cpp \
     concurrentdbtablemodel.cpp \
     dbtalker.cpp \
-    dbtalkerfriend.cpp
+    dbtalkerfriend.cpp \
+    fakedbtalkerfriend.cpp
 
 HEADERS  += mainwindow.h \
     		db_container.h \
@@ -67,7 +69,8 @@ HEADERS  += mainwindow.h \
     dbthreadmanager.h \
     concurrentdbtablemodel.h \
     dbtalker.h \
-    dbtalkerfriend.h
+    dbtalkerfriend.h \
+    fakedbtalkerfriend.h
 
 unix {
 	target.path = /usr/local/bin/

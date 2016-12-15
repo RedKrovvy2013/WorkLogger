@@ -14,7 +14,7 @@ class DBTalkerFriend : public QObject
 public:
     explicit DBTalkerFriend(QObject *parent = 0);
 
-    void request(int, QString);
+    virtual void request(int, QString);
 
 signals:
 	void reply_recv(int, QSqlQuery);

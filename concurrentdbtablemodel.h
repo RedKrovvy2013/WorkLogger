@@ -37,6 +37,7 @@ class ConcurrentDBTableModel : public QAbstractTableModel
 
 public:
     ConcurrentDBTableModel(QObject *parent = 0);
+    ConcurrentDBTableModel(DBTalkerFriend*, QObject *parent = 0);
 
     int rowCount(const QModelIndex &parent) const Q_DECL_OVERRIDE;
     int columnCount(const QModelIndex &parent) const Q_DECL_OVERRIDE;
@@ -49,6 +50,8 @@ public:
     void setTable(QString);
 
     void select();
+
+    QString getTablename();
 	
 private slots:
 	void processReply(int id, QSqlQuery results);

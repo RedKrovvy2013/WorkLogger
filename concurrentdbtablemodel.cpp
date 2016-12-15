@@ -12,6 +12,16 @@ ConcurrentDBTableModel::ConcurrentDBTableModel(QObject *parent)
 				this, &ConcurrentDBTableModel::processReply);
 }
 
+ConcurrentDBTableModel::ConcurrentDBTableModel(DBTalkerFriend* dbtalkerfriend, QObject *parent)
+    : QAbstractTableModel(parent),
+	  setTable_opSeries_count_(0),
+	  width_(0),
+	  dbtalkerfriend_(dbtalkerfriend)
+{
+	connect(dbtalkerfriend_, &DBTalkerFriend::reply_recv,
+				this, &ConcurrentDBTableModel::processReply);
+}
+
 int ConcurrentDBTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -216,4 +226,9 @@ void ConcurrentDBTableModel::select_end(QSqlQuery query) {
 
 	fieldnames_ = futureFieldnames_;
 	tablename_ = futureTablename_;
+}
+
+//TODO: remove this after its use in testing for unit test structure
+QString ConcurrentDBTableModel::getTablename() {
+	return getFutureTablename();
 }
