@@ -3,6 +3,9 @@
 #include <QVector>
 #include <QString>
 
+//TODO: consider loosening the coupling here, making it along the lines
+//	    that any object or group of objs can be moved to controlled thread
+
 DBThreadManager::DBThreadManager(QObject *parent)
             : QThread(parent),
 			  dbtalker(DBTalker::getSingleton()) {

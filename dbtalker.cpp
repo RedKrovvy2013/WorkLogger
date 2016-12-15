@@ -9,6 +9,7 @@
 
 DBTalker::DBTalker(QObject *parent) : QObject(parent)
 {
+	//TODO: verify that this is being init'd on the db thread!
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file("settings.xml");
 	pugi::xml_node settings = doc.child("settings");
