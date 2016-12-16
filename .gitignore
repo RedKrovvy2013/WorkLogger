@@ -1,2 +1,5 @@
 *.user
 .project
+Makefile*
+debug
+release
